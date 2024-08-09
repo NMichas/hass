@@ -1,0 +1,73 @@
+mode: restart
+
+blueprint:
+  name: Resettable timer switch
+  description: Automatically switch off an entity when time elapses.
+  domain: automation
+  source_url: https://github.com/NMichas/hass/blob/main/blueprints/resettable_timer_switch.yaml
+
+  input:
+    timer:
+      name: Timer
+      description: The timer helper keeping track of how long the switch is on.
+      selector:
+        entity:
+          domain:
+            - timer
+          multiple: false
+    switch:
+      name: Switch
+      description: The switch to turn off.
+      selector:
+        entity:
+          domain:
+            - switch
+          multiple: false
+    duration:
+      name: Duration
+      description: A helper numeric object specifying the duration of the timer (i.e. how long you wnat to switch to remain on).
+      selector:
+        entity:
+          domain:
+            - input_number
+          multiple: false
+
+variables:
+  duration_input: !input duration
+
+trigger:
+  - platform: state
+    entity_id: !input switch
+    from: "off"
+    to: "on"
+  - platform: state
+    entity_id: !input switch
+    from: "on"
+    to: "off"
+
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: !input switch
+            state: "on"
+        sequence:
+          - action: timer.start
+            data:
+              duration: "{{ states(duration_input) | int * 60 }}"
+            entity_id: !input timer
+          - wait_for_trigger:
+              - platform: event
+                event_type: timer.finished
+                event_data:
+                  entity_id: !input timer
+          - service: homeassistant.turn_off
+            data: {}
+            entity_id: !input switch
+      - conditions:
+          - condition: state
+            entity_id: !input switch
+            state: "off"
+        sequence:
+          - action: timer.cancel
+            entity_id: !input timer
