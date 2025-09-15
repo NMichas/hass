@@ -11,12 +11,12 @@ blueprint:
     button_sensor:
       name: Target switch
       description: Which Aqara Wireless Remote Switch H1 to use
-#      selector:
-#        entity:
-#          filter:
+      selector:
+        entity:
+          filter:
 #            domain: sensor
-#            integration: mqtt
-#          multiple: false
+            integration: mqtt
+          multiple: false
     single_left:
       name: Left button - Single press
       description: Action to run on a single press of the left button
