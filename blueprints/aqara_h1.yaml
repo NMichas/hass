@@ -14,7 +14,7 @@ blueprint:
       selector:
         entity:
           filter:
-#            domain: sensor
+            domain: sensor
             integration: mqtt
           multiple: false
     single_left:
